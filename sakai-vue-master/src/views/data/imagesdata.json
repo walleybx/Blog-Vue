@@ -1,0 +1,18 @@
+[
+    {
+      "itemImageSrc": "https://primefaces.org/cdn/primevue/images/galleria/galleria1.jpg",
+      "alt": "Image 1 description",
+      "thumbnailImageSrc": "https://primefaces.org/cdn/primevue/images/galleria/galleria1s.jpg"
+    },
+    {
+      "itemImageSrc": "https://primefaces.org/cdn/primevue/images/galleria/galleria2.jpg",
+      "alt": "Image 2 description",
+      "thumbnailImageSrc": "https://primefaces.org/cdn/primevue/images/galleria/galleria2s.jpg"
+    },
+    {
+      "itemImageSrc": "https://primefaces.org/cdn/primevue/images/galleria/galleria3.jpg",
+      "alt": "Image 3 description",
+      "thumbnailImageSrc": "https://primefaces.org/cdn/primevue/images/galleria/galleria3s.jpg"
+    }
+]
+  
