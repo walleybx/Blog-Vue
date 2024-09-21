@@ -1,8 +1,62 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
 import AppConfigurator from './AppConfigurator.vue';
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/modules/user';
+
+// 获取 Pinia 用户 store
+const userStore = useUserStore();
+const router = useRouter();
 
 const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout();
+
+// 菜单项
+const menuItems = ref([
+    { label: '个人主页', icon: 'pi pi-home', command: () => goToProfile() },
+    { label: '修改密码', icon: 'pi pi-key', command: () => changePassword() },
+    { label: '退出登录', icon: 'pi pi-sign-out', command: () => logout() }
+]);
+
+const menu = ref(null);
+
+// 打印并严格判断 token 是否有值
+console.log('userStore.token:', userStore.token); // 打印 token
+
+// 如果 token 不为空，表示已登录
+const isLoggedIn = ref(userStore.token !== null && userStore.token !== '');
+
+// 获取用户头像（假设你在 userStore 中有用户信息）
+const userAvatar = ref(userStore.userInfo.avatar || 'https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png');
+
+// 点击事件处理逻辑
+const handleClick = (event) => {
+    if (isLoggedIn.value) {
+        // 如果已登录，显示菜单
+        menu.value.toggle(event);
+    } else {
+        // 如果未登录，跳转到登录页面
+        router.push('/auth/login');
+    }
+};
+
+
+// 导航到个人主页
+const goToProfile = () => {
+    router.push('/profile');
+};
+
+// 修改密码
+const changePassword = () => {
+    router.push('/change-password');
+};
+
+// 退出登录
+const logout = () => {
+    userStore.clearToken();
+    router.push('/uikit/blog'); // 跳转到登录页面
+};
+
 </script>
 
 <template>
@@ -43,8 +97,7 @@ const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout();
                     <button
                         v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
                         type="button"
-                        class="layout-topbar-action layout-topbar-action-highlight"
-                    >
+                        class="layout-topbar-action layout-topbar-action-highlight">
                         <i class="pi pi-palette"></i>
                     </button>
                     <AppConfigurator />
@@ -58,7 +111,7 @@ const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout();
                 <i class="pi pi-ellipsis-v"></i>
             </button>
 
-            <div class="layout-topbar-menu hidden lg:block">
+            <div class="hidden layout-topbar-menu lg:block">
                 <div class="layout-topbar-menu-content">
                     <button type="button" class="layout-topbar-action">
                         <i class="pi pi-calendar"></i>
@@ -68,10 +121,15 @@ const { onMenuToggle, toggleDarkMode, isDarkTheme } = useLayout();
                         <i class="pi pi-inbox"></i>
                         <span>Messages</span>
                     </button>
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-user"></i>
+                    <!-- 用户头像按钮，点击时展示菜单 -->
+                    <button type="button" class="layout-topbar-action" @click="handleClick">
+                        <img v-if="isLoggedIn" :src="userAvatar" alt="User Avatar" class="user-avatar" />
+                        <i v-else class="pi pi-user"></i>
                         <span>Profile</span>
                     </button>
+
+                    <!-- 菜单组件（登录状态下显示） -->
+                    <Menu ref="menu" :model="menuItems" popup />
                 </div>
             </div>
         </div>

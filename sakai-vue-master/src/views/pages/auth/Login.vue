@@ -1,10 +1,50 @@
 <script setup>
 import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
 import { ref } from 'vue';
+import { loginApi } from '@/service/api/auth/login';  // 登录接口
+import { useUserStore } from '@/stores/modules/user';  // 用户状态管理
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
+const userStore = useUserStore();
 const email = ref('');
 const password = ref('');
 const checked = ref(false);
+const token = ref('');
+
+const formData = ref({
+  username: email.value,
+  password: password.value,
+  checked: checked.value  // 记住我选项
+});
+
+const login = async (formData) => {
+  try {
+    // 更新 formData，确保所有字段是字符串类型
+    const data = {
+      username: email.value,
+      password: password.value,
+      checked: checked.value.toString()  // 将布尔值转换为字符串
+    };
+
+    console.log("Form Data:", data);
+
+    // 将 data 转换为 JSON 字符串
+    const jsonData = JSON.stringify(data);
+    console.log("JSON Stringified Form Data:", jsonData);
+    const response = await loginApi(jsonData);
+    console.log("response:", response.toString());
+    // 登录成功后，存储 token 和用户信息
+    userStore.setToken(response.toString());
+    // userStore.setUserInfo(userInfo);
+
+    // 4.跳转到首页
+    router.push("/uikit/blog");
+  } catch (error) {
+    console.error('Login failed:', error);
+    throw error;  // 登录失败抛出异常
+  }
+};
 </script>
 
 <template>
@@ -12,9 +52,9 @@ const checked = ref(false);
     <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
         <div class="flex flex-col items-center justify-center">
             <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
-                <div class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20" style="border-radius: 53px">
-                    <div class="text-center mb-8">
-                        <svg viewBox="0 0 54 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-8 w-16 shrink-0 mx-auto">
+                <div class="w-full px-8 py-20 bg-surface-0 dark:bg-surface-900 sm:px-20" style="border-radius: 53px">
+                    <div class="mb-8 text-center">
+                        <svg viewBox="0 0 54 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-16 mx-auto mb-8 shrink-0">
                             <path
                                 fill-rule="evenodd"
                                 clip-rule="evenodd"
@@ -31,25 +71,25 @@ const checked = ref(false);
                                 />
                             </g>
                         </svg>
-                        <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Welcome to PrimeLand!</div>
-                        <span class="text-muted-color font-medium">Sign in to continue</span>
+                        <div class="mb-4 text-3xl font-medium text-surface-900 dark:text-surface-0">Welcome to PrimeLand!</div>
+                        <span class="font-medium text-muted-color">Sign in to continue</span>
                     </div>
 
                     <div>
-                        <label for="email1" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Email</label>
+                        <label for="email1" class="block mb-2 text-xl font-medium text-surface-900 dark:text-surface-0">Email</label>
                         <InputText id="email1" type="text" placeholder="Email address" class="w-full md:w-[30rem] mb-8" v-model="email" />
 
-                        <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Password</label>
+                        <label for="password1" class="block mb-2 text-xl font-medium text-surface-900 dark:text-surface-0">Password</label>
                         <Password id="password1" v-model="password" placeholder="Password" :toggleMask="true" class="mb-4" fluid :feedback="false"></Password>
 
-                        <div class="flex items-center justify-between mt-2 mb-8 gap-8">
+                        <div class="flex items-center justify-between gap-8 mt-2 mb-8">
                             <div class="flex items-center">
                                 <Checkbox v-model="checked" id="rememberme1" binary class="mr-2"></Checkbox>
                                 <label for="rememberme1">Remember me</label>
                             </div>
-                            <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
+                            <span class="ml-2 font-medium text-right no-underline cursor-pointer text-primary">Forgot password?</span>
                         </div>
-                        <Button label="Sign In" class="w-full" as="router-link" to="/"></Button>
+                        <Button label="Sign In" @click="login(formData)"></Button>
                     </div>
                 </div>
             </div>
